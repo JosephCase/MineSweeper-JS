@@ -1,0 +1,120 @@
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+}
+
+#board {
+    background-color: #fff;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.cell {
+    margin: 1px;
+    width: 28px;
+    height: 28px;
+    background: #6f6f6f;
+    cursor: pointer;
+    text-align: center;
+    line-height: 28px;
+    border-radius: 4px;
+}
+.cell.open {
+    background: #fff;
+}
+
+.cell.open[data-adj-mines] {
+    background: #d8d8d8;
+}
+
+.cell.open[data-adj-mines="1"] {
+    color: blue;
+}
+.cell.open[data-adj-mines="2"] {
+    color: green;
+}
+.cell.open[data-adj-mines="3"] {
+    color: orangered;
+}
+.cell.open[data-adj-mines="4"] {
+    color: purple;
+}
+.cell.open[data-adj-mines="5"] {
+    color: gold;
+}
+.cell.open[data-adj-mines="6"] {
+    color: orange;
+}
+.cell.open[data-adj-mines="7"] {
+    color: turquoise;
+}
+.cell.open[data-adj-mines="8"] {
+    color: magenta;
+}
+
+.cell.mine {
+    background: #b5b5b5;
+    margin: 2px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+}
+.cell.boom {
+    background: #ff2f2f;
+}
+
+
+
+
+
+/**/
+
+#interface #replay {
+    position: absolute;
+    width: 300px;
+    max-width: 100%;
+    text-align: center;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000;
+    border-radius: 4px 4px 0 0;
+    font-size: 32px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+}
+
+#interface .message {
+    position: absolute;
+    width: 1000px;
+    max-width: 100%;
+    text-align: center;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
+    background-color: #000;
+    border-radius: 4px 4px 0 0;
+    transition: all 1s;
+    font-size: 60px;
+    font-weight: bold;
+    color: #fff;
+}
+
+#interface.win #successMessage {
+    transform: translate(-50%, 0%);
+}
+
+#interface.loss #failureMessage {
+    transform: translate(-50%, 0%);
+}
