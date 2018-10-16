@@ -1,18 +1,24 @@
 class Interface {
     constructor(htmlElement) {
-        this.htmlElement = htmlElement;
-        this.htmlElement.querySelector("#replay").addEventListener('click', this.replay.bind(this));
 
-        this.initGame();
+        this.htmlElement = htmlElement;
+        this.game = null;
+
+        this.htmlElement.querySelector("#replay").addEventListener('click', this.replay.bind(this));
+        this.createNewGame();
 
     }
 
-    initGame() {
-        const board = this.htmlElement.querySelector("#board");
-        const size = Math.floor(Math.random() * 10) + 5;
+    createNewGame() {
 
-        this.game = new Game(board, size, 0.1, this.handleGameEnd.bind(this));
-        board.style.width = board.style.height = `${30 * size}px`;
+        const board = this.htmlElement.querySelector("#board");
+        const size = 10;
+        const mineChance = 0.1;
+
+        board.style.width = board.style.height = `${30 * size}px`;  // should this be done within the game?
+
+        this.game = new Game(board, size, mineChance, this.handleGameEnd.bind(this));
+        this.game.draw();
     }
 
     handleGameEnd(success) {
@@ -32,6 +38,6 @@ class Interface {
 
     replay() {
         this.htmlElement.classList.remove('win', 'loss');
-        this.initGame();
+        this.createNewGame();
     }
 }

@@ -1,68 +1,75 @@
 class Game {
-    constructor(htmlContainer, size = 10, bombChance = 0.1, onEnd = null) {
+    constructor(htmlContainer, size = 10, mineChance = 0.1, onEnd = null) {
         this.htmlContainer = htmlContainer;
         this.size = size;
-        this.bombChance = bombChance;
+        this.mineChance = mineChance;
         this.ended = false;
-        this.field = this.createField(this.cellClickHandler.bind(this), this.size, this.bombChance);
+        this.mineField = this.createMineField(this.cellClickHandler.bind(this), this.size, this.mineChance);
         this.onEnd = onEnd;
-        this.field1d = this.field.reduce((acc, item) => [...acc, ...item], []); //create a linear, 1 dimensional array of all cells
-        this.draw();
+        this.isCompleteDebounced = this.debounce(this.isComplete.bind(this), 1);
     }
      
-    createField(cellClickHandler, size, bombChance) {
+    createMineField(cellClickHandler, size, mineChance) {
 
-        let field = [];
+        let grid = [];
 
         for (let x = 0; x < size; x++) {
             let column = [];
             for (let y = 0; y < size; y++) {
-                const hasMine = Math.random() < bombChance;
-                const cell = new Cell(x, y, hasMine, 0, (hasMine) => cellClickHandler(x, y, hasMine));
+                const hasMine = Math.random() < mineChance;
+                const cell = new Cell(hasMine, 0, () => cellClickHandler(x, y, hasMine));
                 column = [...column, cell];
             }
         
-            field = [...field, column];
+            grid = [...grid, column];
             
         }
 
-        return field;
+        return grid;
     }
     
     cellClickHandler(x, y, hasMine) {
 
         if(this.ended) return;
         
-        this.revealCell(x,y);
+        this.revealCell(x,y,true);
 
         if(hasMine) {
             this.lose();
-        } else if(this.isComplete()) {
-            this.win();
         }
-
-        this.draw();
 
     }
 
-    revealCell(x,y) {
+    revealCell(x,y, clicked = false) {
 
         const cell = this.getCell(x,y);
         const adjacentMineCount = this.countAdjacentMines(x,y);
 
-        cell.reveal(adjacentMineCount);
+        cell.reveal(adjacentMineCount, clicked);
 
         if(adjacentMineCount === 0) this.revealAdjacent(x,y);
 
+        this.isCompleteDebounced();
+
+    }
+
+    debounce(func, delay) {
+        let inDebounce;
+        return function() {
+            clearTimeout(inDebounce)
+            inDebounce = setTimeout(func, delay)
+        }
     }
 
     revealAdjacent(x,y) {
-        for (let i = x - 1; i <= x + 1; i++) {
-            for (let j = y - 1; j <= y + 1; j++) {
-                let cell = this.getCell(i,j);
-                if(cell && !cell.hasMine && !cell.open) this.revealCell(i,j);
+        setTimeout(() => {
+            for (let i = x - 1; i <= x + 1; i++) {
+                for (let j = y - 1; j <= y + 1; j++) {
+                    let cell = this.getCell(i,j);
+                    if(cell && !cell.hasMine && !cell.open) this.revealCell(i,j);
+                }
             }
-        }
+        })
     }
 
     countAdjacentMines(x, y) {
@@ -77,18 +84,26 @@ class Game {
     }
 
     getCell(x, y) {
-        if(!this.field[x] || !this.field[y]) return null;
-        return this.field[x][y];
+        if(!this.mineField[x] || !this.mineField[y]) {
+            return null;
+        }
+        return this.mineField[x][y];
+    }
+
+    getMineField1d() {
+        return this.mineField.reduce((acc, item) => [...acc, ...item], []);
     }
 
     isComplete() {
-        return this.field1d.every((elem) => (
+        if(this.getMineField1d().every((elem) => (
             elem.open === true || elem.hasMine === true
-        ))
+        ))) {
+            this.win();
+        }
     }
 
-    revealAll() {
-        this.field1d.forEach(cell => {
+    revealMines() {
+        this.getMineField1d().forEach(cell => {
             if(!cell.open && cell.hasMine) {
                 cell.reveal();
             }
@@ -96,8 +111,8 @@ class Game {
     }
 
     lose() {
-        this.revealAll();
         this.ended = true;
+        this.revealMines();
         if(this.onEnd) {
             this.onEnd(false);
         } else {
@@ -112,14 +127,12 @@ class Game {
             setTimeout(() => alert('You Win'), 500);
         }
     }
-    
+
     draw() {
-        
-        // put the cells on the dom - could probably do this better.
         this.htmlContainer.innerHTML = '';
-        this.field.forEach(column => column.forEach(cell => {
-            this.htmlContainer.appendChild(cell.draw());
-        }))
+        this.getMineField1d().forEach(cell => {
+            this.htmlContainer.appendChild(cell.htmlElement);
+        })
     }
 }
 

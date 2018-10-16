@@ -1,43 +1,40 @@
 class Cell {
-    constructor(x, y, hasMine = false, adjacentMines = 0, clickHandler) {
-        this.x = x;
-        this.y = y;
+    constructor(hasMine = false, adjacentMines = null, clickHandler) {
         this.hasMine = hasMine;
-        this.adjacentMines = null;
+        this.adjacentMines = adjacentMines;
         this.open = false;
         this.clickHandler = clickHandler;
-        this.clicked = false;
+        this.htmlElement = this.createHtmlElement();
     }
-    reveal(adjacentMines = 0) {
-        Object.assign(this, {open: true, adjacentMines});
+    reveal(adjacentMines = 0, clicked = false) {
+        this.open = true;
+        this.adjacentMines = adjacentMines;
+        this.updateHtmlElement(clicked);
     }
     onClick() {
-        this.clicked = true;
-        this.clickHandler(this.hasMine);
+        this.clickHandler();
     }
-    draw() {
-        let htmlCell = document.createElement('p');
+    updateHtmlElement(clicked) {
 
-        
-        htmlCell.classList.add('cell');
-        if(this.open) {
-            htmlCell.classList.add('open');
+        const { htmlElement } = this; 
+        htmlElement.classList.add('open');
 
-            if(this.hasMine) {
-                htmlCell.classList.add('mine');
-                if(this.clicked === true) htmlCell.classList.add('boom')
+        if(this.hasMine) {
+            htmlElement.classList.add('mine');
+            if(clicked === true) htmlElement.classList.add('boom')
 
-                htmlCell.innerText = 'x';
-            } else {
-                if(this.adjacentMines !== 0) {
-                    htmlCell.innerText = this.adjacentMines;
-                    htmlCell.dataset.adjMines = this.adjacentMines;
-                }
+            htmlElement.innerText = 'x';
+        } else {
+            if(this.adjacentMines !== 0) {
+                htmlElement.innerText = this.adjacentMines;
+                htmlElement.dataset.adjMines = this.adjacentMines;
             }
         }
-            
+    }
+    createHtmlElement() {
+        const htmlCell = document.createElement('p');
+        htmlCell.classList.add('cell');
         htmlCell.addEventListener('click', () => this.onClick());
-    
         return htmlCell;
     }
     
